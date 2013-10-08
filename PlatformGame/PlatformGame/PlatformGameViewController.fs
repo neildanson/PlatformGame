@@ -3,6 +3,7 @@ namespace PlatformGame
 open System
 open System.Drawing
 
+open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
 
@@ -86,8 +87,33 @@ type PlatformGameViewController () =
         }
         
         let level1() = async {
-            //Probably good to do something more interesting here!!
-            do! Async.Sleep 4000
+            //Pop in some floor
+            for i in 0..10 do 
+                use grass = new SKSpriteNode("grass")
+                grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
+                scene.AddChild grass
+            
+            //Lets create a moving platform from 3 connected sprites
+            use platformLeft = new SKSpriteNode("stoneLeft")
+            use platformCenter = new SKSpriteNode("stoneMid")
+            use platformRight = new SKSpriteNode("stoneRight")
+            //Position the left and right **relative** to the center one
+            platformLeft.Position <- PointF(-platformLeft.Size.Width, 0.0f)
+            platformRight.Position <- PointF(platformRight.Size.Width, 0.0f)
+            //Add them as children of the center sprite
+            platformCenter.AddChild platformLeft
+            platformCenter.AddChild platformRight
+            //Add the center sprite to the scene (this adds all 3)
+            scene.AddChild platformCenter
+            //Next lets define a path that the platform will follow - like Super Mario World 
+            let path = CGPath.EllipseFromRect(RectangleF(50.f,150.f,200.f,200.f), CGAffineTransform.MakeIdentity())
+            let movePlatform = SKAction.FollowPath(path, false, false, 5.0)|>SKAction.RepeatActionForever
+            platformCenter.RunAction movePlatform
+            
+            //We still dont have much of a game here, so lets show the level doing it's bit for 10 seconds
+            do! Async.Sleep 10000
+            //Note: we dont clear the scene right now as we go to GameOver and it looks cool
+            //If we leave the level in the background during game over :)
         }
 
         //Define the loop

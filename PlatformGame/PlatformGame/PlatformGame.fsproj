@@ -98,4 +98,10 @@
     <Compile Include="AppDelegate.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" />
+  <ItemGroup>
+    <BundleResource Include="Resources\grass.png" />
+    <BundleResource Include="Resources\stoneLeft.png" />
+    <BundleResource Include="Resources\stoneMid.png" />
+    <BundleResource Include="Resources\stoneRight.png" />
+  </ItemGroup>
 </Project>
