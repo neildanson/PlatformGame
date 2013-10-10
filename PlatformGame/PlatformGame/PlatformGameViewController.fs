@@ -86,23 +86,31 @@ type PlatformGameViewController () =
             scene.RemoveAllChildren()
         }
         
-        let level1() = async {
+        let level1() = async {        
+            let createLevelSprite (name:string) = 
+                let sprite = new SKSpriteNode(name)
+                sprite.PhysicsBody <- SKPhysicsBody.BodyWithRectangleOfSize sprite.Size
+                sprite.PhysicsBody.AffectedByGravity <- false
+                sprite.PhysicsBody.Dynamic <- false
+                sprite
+                
             //Pop in some floor
             for i in 0..10 do 
-                use grass = new SKSpriteNode("grass")
+                use grass = createLevelSprite "grass" 
                 grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
                 scene.AddChild grass
             
             //Lets create a moving platform from 3 connected sprites
-            use platformLeft = new SKSpriteNode("stoneLeft")
-            use platformCenter = new SKSpriteNode("stoneMid")
-            use platformRight = new SKSpriteNode("stoneRight")
+            use platformLeft = createLevelSprite "stoneLeft"
+            use platformCenter = createLevelSprite "stoneMid"
+            use platformRight = createLevelSprite "stoneRight"
             //Position the left and right **relative** to the center one
             platformLeft.Position <- PointF(-platformLeft.Size.Width, 0.0f)
             platformRight.Position <- PointF(platformRight.Size.Width, 0.0f)
             //Add them as children of the center sprite
             platformCenter.AddChild platformLeft
             platformCenter.AddChild platformRight
+            
             //Add the center sprite to the scene (this adds all 3)
             scene.AddChild platformCenter
             //Next lets define a path that the platform will follow - like Super Mario World 
@@ -110,8 +118,26 @@ type PlatformGameViewController () =
             let movePlatform = SKAction.FollowPath(path, false, false, 5.0)|>SKAction.RepeatActionForever
             platformCenter.RunAction movePlatform
             
+            //Add a player, with physics which are affected by gravity and are dynamic
+            use player = new SKSpriteNode("player")
+            player.PhysicsBody <- SKPhysicsBody.BodyWithRectangleOfSize player.Size
+            player.PhysicsBody.AffectedByGravity <- true
+            player.PhysicsBody.AllowsRotation <- false
+            player.PhysicsBody.Dynamic <- true
+            player.Position <- PointF(320.f,100.f)
+            scene.AddChild player
+            
+            //Add a swipe up to jump. 
+            let swipeUp = new UISwipeGestureRecognizer(Direction=UISwipeGestureRecognizerDirection.Up)
+            swipeUp.AddTarget (fun () -> 
+                if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
+                    player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 200.f))) |> ignore
+            
+            x.View.AddGestureRecognizer swipeUp
+            
             //We still dont have much of a game here, so lets show the level doing it's bit for 10 seconds
             do! Async.Sleep 10000
+            x.View.RemoveGestureRecognizer swipeUp
             //Note: we dont clear the scene right now as we go to GameOver and it looks cool
             //If we leave the level in the background during game over :)
         }
