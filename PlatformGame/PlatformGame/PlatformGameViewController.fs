@@ -9,6 +9,18 @@ open MonoTouch.UIKit
 
 open MonoTouch.SpriteKit
 
+type Scene(size:SizeF) = 
+    inherit SKScene(size) 
+        
+    member val UpdateEvent = Event<_>()
+    member val DidSimulatePhysicsEvent = Event<_>()
+    override s.Update time = 
+       s.UpdateEvent.Trigger time
+        
+    override s.DidSimulatePhysics() = 
+        s.DidSimulatePhysicsEvent.Trigger None
+                
+
 [<Register ("PlatformGameViewController")>]
 type PlatformGameViewController () =
     inherit UIViewController ()
@@ -35,7 +47,7 @@ type PlatformGameViewController () =
 
         //Create a SpriteKit Scene - 640x480 is high enough to look OK
         // & low enough to not require an artist
-        let scene =  new SKScene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
+        let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
         scene.ScaleMode <- SKSceneScaleMode.AspectFit
         
         //Simple start screen - 
@@ -86,7 +98,12 @@ type PlatformGameViewController () =
             scene.RemoveAllChildren()
         }
         
-        let level1() = async {        
+        let level1() = async {    
+            use scrollNode = new SKNode()    
+            scene.AddChild scrollNode
+            use parallaxScrollNode = new SKNode()
+            scene.AddChild parallaxScrollNode
+            
             let createLevelSprite (name:string) = 
                 let sprite = new SKSpriteNode(name)
                 sprite.PhysicsBody <- SKPhysicsBody.BodyWithRectangleOfSize sprite.Size
@@ -95,10 +112,17 @@ type PlatformGameViewController () =
                 sprite
                 
             //Pop in some floor
-            for i in 0..10 do 
+            for i in 0..100 do 
                 use grass = createLevelSprite "grass" 
                 grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
-                scene.AddChild grass
+                scrollNode.AddChild grass
+            
+            //Pop in a parallax layer
+            for i in 0..50 do 
+                use hill = new SKSpriteNode "hill_small"
+                hill.Position <- PointF(float32 i * 70.f, 50.f)
+                hill.ZPosition <- -1.f
+                parallaxScrollNode.AddChild hill 
             
             //Lets create a moving platform from 3 connected sprites
             use platformLeft = createLevelSprite "stoneLeft"
@@ -112,7 +136,7 @@ type PlatformGameViewController () =
             platformCenter.AddChild platformRight
             
             //Add the center sprite to the scene (this adds all 3)
-            scene.AddChild platformCenter
+            scrollNode.AddChild platformCenter
             //Next lets define a path that the platform will follow - like Super Mario World 
             let path = CGPath.EllipseFromRect(RectangleF(50.f,150.f,200.f,200.f), CGAffineTransform.MakeIdentity())
             let movePlatform = SKAction.FollowPath(path, false, false, 5.0)|>SKAction.RepeatActionForever
@@ -120,19 +144,26 @@ type PlatformGameViewController () =
             
             //Add a player, with physics which are affected by gravity and are dynamic
             use player = new SKSpriteNode("player")
-            player.PhysicsBody <- SKPhysicsBody.BodyWithRectangleOfSize player.Size
+            player.PhysicsBody <- SKPhysicsBody.BodyWithCircleOfRadius (player.Size.Height / 2.f)
             player.PhysicsBody.AffectedByGravity <- true
             player.PhysicsBody.AllowsRotation <- false
             player.PhysicsBody.Dynamic <- true
+            player.PhysicsBody.UsesPreciseCollisionDetection <- true
             player.Position <- PointF(320.f,100.f)
-            scene.AddChild player
+            player.Name <- "Player"
+            scrollNode.AddChild player
             
             //Add a swipe up to jump. 
             let swipeUp = new UISwipeGestureRecognizer(Direction=UISwipeGestureRecognizerDirection.Up)
             swipeUp.AddTarget (fun () -> 
                 if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
                     player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 200.f))) |> ignore
-            
+            //Add event to know when Update is called
+            use _ = scene.UpdateEvent.Publish.Subscribe(fun time -> player.PhysicsBody.ApplyImpulse(CGVector(2.0f,0.0f)))
+            //Move the scroll node inversely to the players position so the player stays centered on screen
+            use _ = scene.DidSimulatePhysicsEvent.Publish.Subscribe(fun _ -> 
+                scrollNode.Position <- PointF(320.f - player.Position.X,0.0f)
+                parallaxScrollNode.Position <- PointF(-player.Position.X / 2.f, 0.f))
             x.View.AddGestureRecognizer swipeUp
             
             //We still dont have much of a game here, so lets show the level doing it's bit for 10 seconds
@@ -155,6 +186,7 @@ type PlatformGameViewController () =
                 
         //Present the scene
         skView.PresentScene scene
+    
 
     override x.ShouldAutorotateToInterfaceOrientation (toInterfaceOrientation) =
         // Return true for supported orientations

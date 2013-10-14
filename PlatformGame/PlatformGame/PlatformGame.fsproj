@@ -104,5 +104,6 @@
     <BundleResource Include="Resources\stoneMid.png" />
     <BundleResource Include="Resources\stoneRight.png" />
     <BundleResource Include="Resources\player.png" />
+    <BundleResource Include="Resources\hill_small.png" />
   </ItemGroup>
 </Project>
