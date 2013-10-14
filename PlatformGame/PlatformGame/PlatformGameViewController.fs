@@ -102,6 +102,7 @@ type PlatformGameViewController () =
             use scrollNode = new SKNode()    
             scene.AddChild scrollNode
             use parallaxScrollNode = new SKNode()
+            parallaxScrollNode.ZPosition <- -1.f
             scene.AddChild parallaxScrollNode
             
             let createLevelSprite (name:string) = 
@@ -121,7 +122,6 @@ type PlatformGameViewController () =
             for i in 0..50 do 
                 use hill = new SKSpriteNode "hill_small"
                 hill.Position <- PointF(float32 i * 70.f, 50.f)
-                hill.ZPosition <- -1.f
                 parallaxScrollNode.AddChild hill 
             
             //Lets create a moving platform from 3 connected sprites
