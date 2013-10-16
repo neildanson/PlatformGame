@@ -19,7 +19,8 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <MtouchLink>None</MtouchLink>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <ConsolePause>false</ConsolePause>
     <MtouchDebug>true</MtouchDebug>
   </PropertyGroup>
@@ -29,7 +30,8 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <MtouchLink>None</MtouchLink>
     <ConsolePause>false</ConsolePause>
     <Tailcalls>true</Tailcalls>
@@ -41,7 +43,8 @@
     <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <MtouchDebug>true</MtouchDebug>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
@@ -51,7 +54,8 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhone\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <CodesignKey>iPhone Developer</CodesignKey>
     <ConsolePause>false</ConsolePause>
     <Tailcalls>true</Tailcalls>
@@ -62,7 +66,8 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhone\Ad-Hoc</OutputPath>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <BuildIpa>true</BuildIpa>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <CodesignProvision>Automatic:AdHoc</CodesignProvision>
@@ -75,7 +80,8 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhone\AppStore</OutputPath>
     <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget />
+    <PlatformTarget>
+    </PlatformTarget>
     <CodesignKey>iPhone Distribution</CodesignKey>
     <CodesignProvision>Automatic:AppStore</CodesignProvision>
     <ConsolePause>false</ConsolePause>
@@ -89,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
+    <Folder Include="Resources\Player.atlas\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -103,7 +110,20 @@
     <BundleResource Include="Resources\stoneLeft.png" />
     <BundleResource Include="Resources\stoneMid.png" />
     <BundleResource Include="Resources\stoneRight.png" />
-    <BundleResource Include="Resources\player.png" />
     <BundleResource Include="Resources\hill_small.png" />
+    <BundleResource Include="Resources\Level1.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk02.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk03.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk04.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk05.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk06.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk07.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk08.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk09.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk10.png" />
+    <AtlasTexture Include="Resources\Player.atlas\p1_walk11.png" />
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@ namespace PlatformGame
 open System
 open System.Drawing
 
+open MonoTouch.AVFoundation
 open MonoTouch.CoreGraphics
 open MonoTouch.Foundation
 open MonoTouch.UIKit
@@ -49,6 +50,19 @@ type PlatformGameViewController () =
         // & low enough to not require an artist
         let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
         scene.ScaleMode <- SKSceneScaleMode.AspectFit
+        
+        //Open an mp3, play it and return an IDisposable to stop and cleanup.
+        let playSong song = 
+            let mutable error : NSError = null
+            use audioplayer = new AVAudioPlayer(NSUrl.FromFilename song, "mp3", &error)
+            ignore <| audioplayer.Retain() //Without this line the audio immediately stops
+            audioplayer.NumberOfLoops <- -1 //Loop forever
+            ignore <| audioplayer.Play()
+            { new IDisposable with
+                member __.Dispose() = 
+                    audioplayer.Stop()
+                    audioplayer.Release() 
+                    audioplayer.Dispose()}
         
         //Simple start screen - 
         //Setup a tap recognizer that broadcasts an event
@@ -98,7 +112,9 @@ type PlatformGameViewController () =
             scene.RemoveAllChildren()
         }
         
-        let level1() = async {    
+        let level1() = async {   
+            use song = playSong "Level1.mp3"
+            
             use scrollNode = new SKNode()    
             scene.AddChild scrollNode
             use parallaxScrollNode = new SKNode()
@@ -142,8 +158,13 @@ type PlatformGameViewController () =
             let movePlatform = SKAction.FollowPath(path, false, false, 5.0)|>SKAction.RepeatActionForever
             platformCenter.RunAction movePlatform
             
+            let playerAtlas = SKTextureAtlas.FromName "Player"
+            let playerAnimationTextures = playerAtlas.TextureNames.[1..playerAtlas.TextureNames.Length-1]
+                                          |>Array.sort
+                                          |>Array.map playerAtlas.TextureNamed
+            
             //Add a player, with physics which are affected by gravity and are dynamic
-            use player = new SKSpriteNode("player")
+            use player = new SKSpriteNode(playerAnimationTextures.[0])
             player.PhysicsBody <- SKPhysicsBody.BodyWithCircleOfRadius (player.Size.Height / 2.f)
             player.PhysicsBody.AffectedByGravity <- true
             player.PhysicsBody.AllowsRotation <- false
@@ -152,6 +173,11 @@ type PlatformGameViewController () =
             player.Position <- PointF(320.f,100.f)
             player.Name <- "Player"
             scrollNode.AddChild player
+            
+            //Play our animated frames - note the number is the time of EACH FRAME
+            let animation = SKAction.AnimateWithTextures(playerAnimationTextures, 0.05) 
+                            |> SKAction.RepeatActionForever
+            player.RunAction animation
             
             //Add a swipe up to jump. 
             let swipeUp = new UISwipeGestureRecognizer(Direction=UISwipeGestureRecognizerDirection.Up)
