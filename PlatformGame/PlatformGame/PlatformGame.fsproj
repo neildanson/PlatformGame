@@ -23,6 +23,9 @@
     </PlatformTarget>
     <ConsolePause>false</ConsolePause>
     <MtouchDebug>true</MtouchDebug>
+    <MtouchI18n>
+    </MtouchI18n>
+    <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -47,6 +50,12 @@
     </PlatformTarget>
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
+    <MtouchUseSGen>true</MtouchUseSGen>
+    <IpaPackageName>
+    </IpaPackageName>
+    <MtouchI18n>
+    </MtouchI18n>
+    <MtouchArch>ARMv7</MtouchArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -112,6 +121,9 @@
     <BundleResource Include="Resources\stoneRight.png" />
     <BundleResource Include="Resources\hill_small.png" />
     <BundleResource Include="Resources\Level1.mp3" />
+    <BundleResource Include="Resources\Jump.wav" />
+    <BundleResource Include="Resources\GameOver.mp3" />
+    <BundleResource Include="Resources\IntroMusic.mp3" />
   </ItemGroup>
   <ItemGroup>
     <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />

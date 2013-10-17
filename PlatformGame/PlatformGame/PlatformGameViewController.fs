@@ -51,23 +51,25 @@ type PlatformGameViewController () =
         let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
         scene.ScaleMode <- SKSceneScaleMode.AspectFit
         
+        
         //Open an mp3, play it and return an IDisposable to stop and cleanup.
         let playSong song = 
             let mutable error : NSError = null
-            use audioplayer = new AVAudioPlayer(NSUrl.FromFilename song, "mp3", &error)
+            let audioplayer = new AVAudioPlayer(NSUrl.FromFilename song, "mp3", &error)
             ignore <| audioplayer.Retain() //Without this line the audio immediately stops
             audioplayer.NumberOfLoops <- -1 //Loop forever
             ignore <| audioplayer.Play()
             { new IDisposable with
-                member __.Dispose() = 
+                member __.Dispose() =  
                     audioplayer.Stop()
-                    audioplayer.Release() 
+                    audioplayer.Release()
                     audioplayer.Dispose()}
         
         //Simple start screen - 
         //Setup a tap recognizer that broadcasts an event
         //Which we await
         let startScreen() = async {
+            use introMusic = playSong "IntroMusic.mp3"
             let tapEvent = Event<_>()
             let tapRecognizer = new UITapGestureRecognizer(Action<_>(fun x -> tapEvent.Trigger(null)))
             x.View.AddGestureRecognizer tapRecognizer
@@ -94,7 +96,8 @@ type PlatformGameViewController () =
         
         //Simple Game over screen - 
         //Show the obligatory failure text and wait 5 seconds
-        let gameOver() = async {            
+        let gameOver() = async {      
+            use gameOverMusic = playSong "GameOver.mp3"      
             //Add some text to the screen
             use gameOverText = new SKLabelNode("Papyrus", Text="Game Over", FontSize=42.f, Scale=10.f)
             gameOverText.Position <- PointF(320.f, 240.f)
@@ -179,9 +182,12 @@ type PlatformGameViewController () =
                             |> SKAction.RepeatActionForever
             player.RunAction animation
             
+            use jumpSound = SKAction.PlaySoundFileNamed("Jump.wav", true)
+            
             //Add a swipe up to jump. 
             let swipeUp = new UISwipeGestureRecognizer(Direction=UISwipeGestureRecognizerDirection.Up)
             swipeUp.AddTarget (fun () -> 
+                scene.RunAction jumpSound
                 if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
                     player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 200.f))) |> ignore
             //Add event to know when Update is called
