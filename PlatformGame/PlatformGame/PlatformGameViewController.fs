@@ -10,6 +10,8 @@ open MonoTouch.UIKit
 
 open MonoTouch.SpriteKit
 
+type LevelComplete = | Died | Continue
+
 type Scene(size:SizeF) = 
     inherit SKScene(size) 
         
@@ -20,7 +22,6 @@ type Scene(size:SizeF) =
         
     override s.DidSimulatePhysics() = 
         s.DidSimulatePhysicsEvent.Trigger None
-                
 
 [<Register ("PlatformGameViewController")>]
 type PlatformGameViewController () =
@@ -50,6 +51,7 @@ type PlatformGameViewController () =
         // & low enough to not require an artist
         let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
         scene.ScaleMode <- SKSceneScaleMode.AspectFit
+        
         
         
         //Open an mp3, play it and return an IDisposable to stop and cleanup.
@@ -115,7 +117,23 @@ type PlatformGameViewController () =
             scene.RemoveAllChildren()
         }
         
+        let success() = async {
+            let loadParticles res = 
+                let emitterpath = NSBundle.MainBundle.PathForResource (res, "sks")
+                NSKeyedUnarchiver.UnarchiveFile(emitterpath) :?> SKEmitterNode
+            
+            use sparks = loadParticles "Explosion"
+            sparks.Position <- PointF(320.f, 240.f)
+            
+            scene.AddChild sparks
+            
+            do! Async.Sleep 3000
+            //Cleanup!!
+            scene.RemoveAllChildren()
+        }
+        
         let level1() = async {   
+            // BEGIN LEVEL SETUP ------------------------------------------------------------------------------------
             use song = playSong "Level1.mp3"
             
             use scrollNode = new SKNode()    
@@ -131,8 +149,14 @@ type PlatformGameViewController () =
                 sprite.PhysicsBody.Dynamic <- false
                 sprite
                 
+                
             //Pop in some floor
             for i in 0..100 do 
+                use grass = createLevelSprite "grass" 
+                grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
+                scrollNode.AddChild grass
+            
+            for i in 104..200 do 
                 use grass = createLevelSprite "grass" 
                 grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
                 scrollNode.AddChild grass
@@ -154,6 +178,10 @@ type PlatformGameViewController () =
             platformCenter.AddChild platformLeft
             platformCenter.AddChild platformRight
             
+            //END LEVEL SETUP ---------------------------------------------------------------------------------------
+            
+            //BEGIN PLAYER SETUP ------------------------------------------------------------------------------------
+            
             //Add the center sprite to the scene (this adds all 3)
             scrollNode.AddChild platformCenter
             //Next lets define a path that the platform will follow - like Super Mario World 
@@ -167,6 +195,8 @@ type PlatformGameViewController () =
                                           |>Array.map playerAtlas.TextureNamed
             
             //Add a player, with physics which are affected by gravity and are dynamic
+            let levelCompleteEvt = Event<_>()
+            
             use player = new SKSpriteNode(playerAnimationTextures.[0])
             player.PhysicsBody <- SKPhysicsBody.BodyWithCircleOfRadius (player.Size.Height / 2.f)
             player.PhysicsBody.AffectedByGravity <- true
@@ -195,12 +225,20 @@ type PlatformGameViewController () =
             //Move the scroll node inversely to the players position so the player stays centered on screen
             use _ = scene.DidSimulatePhysicsEvent.Publish.Subscribe(fun _ -> 
                 scrollNode.Position <- PointF(320.f - player.Position.X,0.0f)
-                parallaxScrollNode.Position <- PointF(-player.Position.X / 2.f, 0.f))
+                parallaxScrollNode.Position <- PointF(-player.Position.X / 2.f, 0.f)
+                if player.Position.X > 10000.f then 
+                    levelCompleteEvt.Trigger Continue
+                if player.Position.Y < -100.f then
+                    levelCompleteEvt.Trigger Died
+                )
             x.View.AddGestureRecognizer swipeUp
             
-            //We still dont have much of a game here, so lets show the level doing it's bit for 10 seconds
-            do! Async.Sleep 10000
+            // END PLAYER SETUP ---------------------------------------------------------------------------------------
+            
+            let! levelComplete = Async.AwaitEvent levelCompleteEvt.Publish
+            
             x.View.RemoveGestureRecognizer swipeUp
+            return levelComplete
             //Note: we dont clear the scene right now as we go to GameOver and it looks cool
             //If we leave the level in the background during game over :)
         }
@@ -208,8 +246,10 @@ type PlatformGameViewController () =
         //Define the loop
         let rec gameLoop() = async {
             do! startScreen()
-            do! level1()
-            do! gameOver()
+            let! levelEnd = level1()
+            match levelEnd with
+            | Continue -> do! success()
+            | Died -> do! gameOver()
             return! gameLoop()
         } 
         

@@ -124,6 +124,8 @@
     <BundleResource Include="Resources\Jump.wav" />
     <BundleResource Include="Resources\GameOver.mp3" />
     <BundleResource Include="Resources\IntroMusic.mp3" />
+    <BundleResource Include="Resources\Explosion.sks" />
+    <BundleResource Include="Resources\spark.png" />
   </ItemGroup>
   <ItemGroup>
     <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />
