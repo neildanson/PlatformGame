@@ -105,27 +105,31 @@
   <ItemGroup>
     <Folder Include="Resources\" />
     <Folder Include="Resources\Player.atlas\" />
+    <Folder Include="Resources\Level1.atlas\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DSL.fs" />
+    <Compile Include="LevelLoader.fs" />
+    <Compile Include="Level1.fs" />
     <Compile Include="PlatformGameViewController.fs" />
     <Compile Include="AppDelegate.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
-    <BundleResource Include="Resources\grass.png" />
-    <BundleResource Include="Resources\stoneLeft.png" />
-    <BundleResource Include="Resources\stoneMid.png" />
-    <BundleResource Include="Resources\stoneRight.png" />
-    <BundleResource Include="Resources\hill_small.png" />
     <BundleResource Include="Resources\Level1.mp3" />
     <BundleResource Include="Resources\Jump.wav" />
     <BundleResource Include="Resources\GameOver.mp3" />
     <BundleResource Include="Resources\IntroMusic.mp3" />
     <BundleResource Include="Resources\Explosion.sks" />
     <BundleResource Include="Resources\spark.png" />
+    <AtlasTexture Include="Resources\Level1.atlas\hill_small.png" />
+    <AtlasTexture Include="Resources\Level1.atlas\grass.png" />
+    <AtlasTexture Include="Resources\Level1.atlas\stoneLeft.png" />
+    <AtlasTexture Include="Resources\Level1.atlas\stoneMid.png" />
+    <AtlasTexture Include="Resources\Level1.atlas\stoneRight.png" />
   </ItemGroup>
   <ItemGroup>
     <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />

@@ -54,18 +54,7 @@ type PlatformGameViewController () =
         
         
         
-        //Open an mp3, play it and return an IDisposable to stop and cleanup.
-        let playSong song = 
-            let mutable error : NSError = null
-            let audioplayer = new AVAudioPlayer(NSUrl.FromFilename song, "mp3", &error)
-            ignore <| audioplayer.Retain() //Without this line the audio immediately stops
-            audioplayer.NumberOfLoops <- -1 //Loop forever
-            ignore <| audioplayer.Play()
-            { new IDisposable with
-                member __.Dispose() =  
-                    audioplayer.Stop()
-                    audioplayer.Release()
-                    audioplayer.Dispose()}
+        
         
         //Simple start screen - 
         //Setup a tap recognizer that broadcasts an event
@@ -134,60 +123,15 @@ type PlatformGameViewController () =
         
         let level1() = async {   
             // BEGIN LEVEL SETUP ------------------------------------------------------------------------------------
-            use song = playSong "Level1.mp3"
-            
             use scrollNode = new SKNode()    
             scene.AddChild scrollNode
             use parallaxScrollNode = new SKNode()
             parallaxScrollNode.ZPosition <- -1.f
             scene.AddChild parallaxScrollNode
             
-            let createLevelSprite (name:string) = 
-                let sprite = new SKSpriteNode(name)
-                sprite.PhysicsBody <- SKPhysicsBody.BodyWithRectangleOfSize sprite.Size
-                sprite.PhysicsBody.AffectedByGravity <- false
-                sprite.PhysicsBody.Dynamic <- false
-                sprite
-                
-                
-            //Pop in some floor
-            for i in 0..100 do 
-                use grass = createLevelSprite "grass" 
-                grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
-                scrollNode.AddChild grass
-            
-            for i in 104..200 do 
-                use grass = createLevelSprite "grass" 
-                grass.Position <- PointF(float32 i * grass.Size.Width, 0.f)
-                scrollNode.AddChild grass
-            
-            //Pop in a parallax layer
-            for i in 0..50 do 
-                use hill = new SKSpriteNode "hill_small"
-                hill.Position <- PointF(float32 i * 70.f, 50.f)
-                parallaxScrollNode.AddChild hill 
-            
-            //Lets create a moving platform from 3 connected sprites
-            use platformLeft = createLevelSprite "stoneLeft"
-            use platformCenter = createLevelSprite "stoneMid"
-            use platformRight = createLevelSprite "stoneRight"
-            //Position the left and right **relative** to the center one
-            platformLeft.Position <- PointF(-platformLeft.Size.Width, 0.0f)
-            platformRight.Position <- PointF(platformRight.Size.Width, 0.0f)
-            //Add them as children of the center sprite
-            platformCenter.AddChild platformLeft
-            platformCenter.AddChild platformRight
-            
-            //END LEVEL SETUP ---------------------------------------------------------------------------------------
+            use level = LoadLevel Level1.level1 scrollNode parallaxScrollNode
             
             //BEGIN PLAYER SETUP ------------------------------------------------------------------------------------
-            
-            //Add the center sprite to the scene (this adds all 3)
-            scrollNode.AddChild platformCenter
-            //Next lets define a path that the platform will follow - like Super Mario World 
-            let path = CGPath.EllipseFromRect(RectangleF(50.f,150.f,200.f,200.f), CGAffineTransform.MakeIdentity())
-            let movePlatform = SKAction.FollowPath(path, false, false, 5.0)|>SKAction.RepeatActionForever
-            platformCenter.RunAction movePlatform
             
             let playerAtlas = SKTextureAtlas.FromName "Player"
             let playerAnimationTextures = playerAtlas.TextureNames.[1..playerAtlas.TextureNames.Length-1]
@@ -219,7 +163,7 @@ type PlatformGameViewController () =
             swipeUp.AddTarget (fun () -> 
                 scene.RunAction jumpSound
                 if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
-                    player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 200.f))) |> ignore
+                    player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 300.f))) |> ignore
             //Add event to know when Update is called
             use _ = scene.UpdateEvent.Publish.Subscribe(fun time -> player.PhysicsBody.ApplyImpulse(CGVector(2.0f,0.0f)))
             //Move the scroll node inversely to the players position so the player stays centered on screen
