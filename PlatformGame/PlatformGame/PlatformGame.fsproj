@@ -123,13 +123,14 @@
     <BundleResource Include="Resources\Jump.wav" />
     <BundleResource Include="Resources\GameOver.mp3" />
     <BundleResource Include="Resources\IntroMusic.mp3" />
-    <BundleResource Include="Resources\Explosion.sks" />
     <BundleResource Include="Resources\spark.png" />
     <AtlasTexture Include="Resources\Level1.atlas\hill_small.png" />
     <AtlasTexture Include="Resources\Level1.atlas\grass.png" />
     <AtlasTexture Include="Resources\Level1.atlas\stoneLeft.png" />
     <AtlasTexture Include="Resources\Level1.atlas\stoneMid.png" />
     <AtlasTexture Include="Resources\Level1.atlas\stoneRight.png" />
+    <BundleResource Include="Resources\Rocket.sks" />
+    <BundleResource Include="Resources\Explosion.sks" />
   </ItemGroup>
   <ItemGroup>
     <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />

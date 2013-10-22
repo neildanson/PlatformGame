@@ -111,6 +111,13 @@ type PlatformGameViewController () =
                 let emitterpath = NSBundle.MainBundle.PathForResource (res, "sks")
                 NSKeyedUnarchiver.UnarchiveFile(emitterpath) :?> SKEmitterNode
             
+            use rocket = loadParticles "Rocket"
+            rocket.Position <- PointF(320.f,0.f)
+            scene.AddChild rocket
+            
+            do! Async.Sleep 2000
+            rocket.RemoveFromParent()
+            
             use sparks = loadParticles "Explosion"
             sparks.Position <- PointF(320.f, 240.f)
             
@@ -146,6 +153,7 @@ type PlatformGameViewController () =
             player.PhysicsBody.AffectedByGravity <- true
             player.PhysicsBody.AllowsRotation <- false
             player.PhysicsBody.Dynamic <- true
+            player.PhysicsBody.Restitution <- 0.f
             player.PhysicsBody.UsesPreciseCollisionDetection <- true
             player.Position <- PointF(320.f,100.f)
             player.Name <- "Player"
@@ -165,7 +173,7 @@ type PlatformGameViewController () =
                 if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
                     player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 300.f))) |> ignore
             //Add event to know when Update is called
-            use _ = scene.UpdateEvent.Publish.Subscribe(fun time -> player.PhysicsBody.ApplyImpulse(CGVector(2.0f,0.0f)))
+            use _ = scene.UpdateEvent.Publish.Subscribe(fun time -> player.PhysicsBody.ApplyImpulse(CGVector(3.0f,0.0f)))
             //Move the scroll node inversely to the players position so the player stays centered on screen
             use _ = scene.DidSimulatePhysicsEvent.Publish.Subscribe(fun _ -> 
                 scrollNode.Position <- PointF(320.f - player.Position.X,0.0f)

@@ -26,7 +26,7 @@ let level1 = {
               yield! steps 97
               yield! steps 110
               yield movingEllipsePlatform 50 150
-              yield movingEllipsePlatform 1000 150
+              yield movingEllipsePlatform 1000 160
               yield movingEllipsePlatform 3000 150
             ]
     

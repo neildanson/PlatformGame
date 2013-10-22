@@ -51,6 +51,7 @@ let rec loadSprite (atlas:SKTextureAtlas) = function
         spriteNode.PhysicsBody <- makePhysicsBody spriteNode shape
         spriteNode.PhysicsBody.Dynamic <- false
         spriteNode.PhysicsBody.AffectedByGravity <- false
+        spriteNode.PhysicsBody.Restitution <- 0.f
     | Dynamic(shape) -> 
         spriteNode.PhysicsBody <- makePhysicsBody spriteNode shape
         spriteNode.PhysicsBody.Dynamic <- true
