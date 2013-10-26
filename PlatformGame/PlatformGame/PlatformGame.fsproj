@@ -131,6 +131,9 @@
     <AtlasTexture Include="Resources\Level1.atlas\stoneRight.png" />
     <BundleResource Include="Resources\Rocket.sks" />
     <BundleResource Include="Resources\Explosion.sks" />
+    <AtlasTexture Include="Resources\Level1.atlas\cloud.png" />
+    <BundleResource Include="Resources\IntroScreen.png" />
+    <BundleResource Include="Resources\SuccessScreen.mp3" />
   </ItemGroup>
   <ItemGroup>
     <AtlasTexture Include="Resources\Player.atlas\p1_walk01.png" />

@@ -30,5 +30,6 @@ let level1 = {
               yield movingEllipsePlatform 3000 150
             ]
     
-    Background = [ for i in 0..150 -> Sprite("hill_small", Point(i * 70, 50), NoPhysics, []) ] 
+    Background = [ for i in 0..150 -> Sprite("hill_small", Point(i * 70, 85), NoPhysics, []) ] @
+                 [ for i in 0..100 -> Sprite("cloud", Point(i * 300, 400), NoPhysics, []) ]
 }

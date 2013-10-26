@@ -49,7 +49,7 @@ type PlatformGameViewController () =
 
         //Create a SpriteKit Scene - 640x480 is high enough to look OK
         // & low enough to not require an artist
-        let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.Blue)
+        let scene =  new Scene(new SizeF(640.f, 480.f), BackgroundColor=UIColor.FromRGB(100,100,255))
         scene.ScaleMode <- SKSceneScaleMode.AspectFit
         
         
@@ -65,8 +65,12 @@ type PlatformGameViewController () =
             let tapRecognizer = new UITapGestureRecognizer(Action<_>(fun x -> tapEvent.Trigger(null)))
             x.View.AddGestureRecognizer tapRecognizer
             
+            use background = new SKSpriteNode("IntroScreen")
+            background.Position <- PointF(320.f,240.f)
+            scene.AddChild(background)
+            
             //Add some text to the screen
-            use tapToBegin = new SKLabelNode("Papyrus", Text="Tap to Begin", FontSize=42.f)
+            use tapToBegin = new SKLabelNode("Zapfino", Text="Tap to Begin", FontSize=42.f)
             tapToBegin.Position <- PointF(320.f, 240.f)
             scene.AddChild tapToBegin
         
@@ -90,7 +94,7 @@ type PlatformGameViewController () =
         let gameOver() = async {      
             use gameOverMusic = playSong "GameOver.mp3"      
             //Add some text to the screen
-            use gameOverText = new SKLabelNode("Papyrus", Text="Game Over", FontSize=42.f, Scale=10.f)
+            use gameOverText = new SKLabelNode("Zapfino", Text="Game Over", FontSize=42.f, Scale=10.f)
             gameOverText.Position <- PointF(320.f, 240.f)
             scene.AddChild gameOverText  
             
@@ -110,20 +114,21 @@ type PlatformGameViewController () =
             let loadParticles res = 
                 let emitterpath = NSBundle.MainBundle.PathForResource (res, "sks")
                 NSKeyedUnarchiver.UnarchiveFile(emitterpath) :?> SKEmitterNode
-            
+            use _ = playSong "SuccessScreen.mp3"
             use rocket = loadParticles "Rocket"
+            use sparks = loadParticles "Explosion"
+            
             rocket.Position <- PointF(320.f,0.f)
             scene.AddChild rocket
             
-            do! Async.Sleep 2000
+            do! Async.Sleep 1850
             rocket.RemoveFromParent()
             
-            use sparks = loadParticles "Explosion"
             sparks.Position <- PointF(320.f, 240.f)
             
             scene.AddChild sparks
             
-            do! Async.Sleep 3000
+            do! Async.Sleep 1800
             //Cleanup!!
             scene.RemoveAllChildren()
         }
@@ -167,10 +172,10 @@ type PlatformGameViewController () =
             use jumpSound = SKAction.PlaySoundFileNamed("Jump.wav", true)
             
             //Add a swipe up to jump. 
-            let swipeUp = new UISwipeGestureRecognizer(Direction=UISwipeGestureRecognizerDirection.Up)
+            let swipeUp = new UITapGestureRecognizer()
             swipeUp.AddTarget (fun () -> 
                 scene.RunAction jumpSound
-                if swipeUp.State = UIGestureRecognizerState.Ended && player.PhysicsBody.Velocity.dy = 0.f then
+                if player.PhysicsBody.Velocity.dy = 0.f then
                     player.PhysicsBody.ApplyImpulse (CGVector(0.0f, 300.f))) |> ignore
             //Add event to know when Update is called
             use _ = scene.UpdateEvent.Publish.Subscribe(fun time -> player.PhysicsBody.ApplyImpulse(CGVector(3.0f,0.0f)))
